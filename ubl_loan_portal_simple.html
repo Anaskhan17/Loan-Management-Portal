@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UBL – Loan Management Portal</title>
+<style>
+/* ── RESET & BASE ─────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 14px; background: #f0f4f9; color: #1a1a2e; }
+
+/* ── UBL HEADER ───────────────────────────────── */
+.header {
+  background: #1565c0;
+  padding: 0 28px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 3px 10px rgba(13,71,161,.35);
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* SVG UBL Logo */
+.ubl-logo {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+}
+.header-text h1 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+.header-text p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header-user {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  display: none;
+  text-align: right;
+}
+.header-user strong { color: #fff; display: block; font-size: 13px; }
+.btn-logout {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: none;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.15); }
+
+/* ── PAGE SYSTEM ──────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+#pg-login.active  { display: flex; }
+#pg-search.active { display: flex; }
+
+/* ── LOGIN PAGE ───────────────────────────────── */
+#pg-login {
+  min-height: calc(100vh - 62px);
+  align-items: center;
+  justify-content: center;
+  background: #eaf1fb;
+}
+.login-box {
+  background: #fff;
+  border: 1px solid #c5d8f0;
+  border-radius: 8px;
+  width: 380px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(13,71,161,.12);
+}
+.login-box-header {
+  background: #1565c0;
+  padding: 24px 28px;
+  text-align: center;
+}
+.login-box-header svg { width: 52px; height: 52px; margin-bottom: 10px; }
+.login-box-header h2 { font-size: 16px; color: #fff; margin-bottom: 3px; }
+.login-box-header p  { font-size: 11px; color: rgba(255,255,255,0.6); }
+.login-box-body { padding: 28px; }
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #3a5a88;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.field input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #c5d8f0;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+.field input:focus { border-color: #1565c0; }
+
+.btn-primary {
+  width: 100%;
+  padding: 11px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background .2s;
+}
+.btn-primary:hover { background: #0d47a1; }
+.login-hint {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: #6a8aaa;
+  background: #eaf1fb;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+.login-hint strong { color: #1565c0; }
+.login-error {
+  display: none;
+  margin-bottom: 14px;
+  padding: 9px 12px;
+  background: #fde8e8;
+  border: 1px solid #f5b7b7;
+  border-radius: 5px;
+  color: #c62828;
+  font-size: 13px;
+}
+
+/* ── SEARCH PAGE ──────────────────────────────── */
+#pg-search {
+  min-height: calc(100vh - 62px);
+  align-items: center;
+  justify-content: center;
+  background: #eaf1fb;
+}
+.search-box {
+  background: #fff;
+  border: 1px solid #c5d8f0;
+  border-radius: 8px;
+  width: 460px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(13,71,161,.12);
+}
+.search-box-header {
+  background: #1565c0;
+  padding: 20px 26px;
+}
+.search-box-header h2 { font-size: 15px; color: #fff; font-weight: bold; margin-bottom: 3px; }
+.search-box-header p  { font-size: 12px; color: rgba(255,255,255,0.6); }
+.search-box-body { padding: 26px; }
+
+.search-row { display: flex; gap: 10px; }
+.search-row input {
+  flex: 1;
+  padding: 10px 13px;
+  border: 1.5px solid #c5d8f0;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+  text-transform: uppercase;
+  transition: border-color .2s;
+}
+.search-row input:focus { border-color: #1565c0; }
+.btn-search {
+  padding: 10px 22px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s;
+}
+.btn-search:hover { background: #0d47a1; }
+
+.search-error {
+  display: none;
+  margin-top: 10px;
+  padding: 9px 12px;
+  background: #fde8e8;
+  border: 1px solid #f5b7b7;
+  border-radius: 5px;
+  color: #c62828;
+  font-size: 13px;
+}
+.quick-pick { margin-top: 20px; padding-top: 16px; border-top: 1px solid #eaf1fb; }
+.quick-pick p {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6a8aaa;
+  margin-bottom: 9px;
+}
+.id-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 4px 11px;
+  background: #eaf1fb;
+  border: 1px solid #c5d8f0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #1565c0;
+  cursor: pointer;
+  transition: all .15s;
+}
+.chip:hover { background: #1565c0; color: #fff; border-color: #1565c0; }
+
+/* ── DETAILS PAGE ─────────────────────────────── */
+#pg-details { padding: 24px 32px 60px; }
+
+.breadcrumb {
+  font-size: 12px;
+  color: #6a8aaa;
+  margin-bottom: 16px;
+}
+.breadcrumb a { color: #1565c0; cursor: pointer; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+.page-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #0d47a1;
+  margin-bottom: 4px;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: #6a8aaa;
+  margin-bottom: 22px;
+  font-family: 'Courier New', monospace;
+}
+
+/* Panel */
+.panel {
+  background: #fff;
+  border: 1px solid #c5d8f0;
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 8px rgba(13,71,161,.07);
+}
+.panel-title {
+  background: #1565c0;
+  color: #fff;
+  padding: 11px 18px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title span { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: normal; letter-spacing: 0; text-transform: none; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: #eaf1fb; }
+thead th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #3a5a88;
+  text-align: left;
+  border-bottom: 2px solid #c5d8f0;
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid #eaf1fb; transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f4f8fd; }
+tbody td { padding: 11px 14px; vertical-align: middle; }
+
+.td-mono { font-family: 'Courier New', monospace; font-size: 13px; }
+.td-bold { font-weight: bold; }
+.td-green  { color: #1b7a40; font-weight: bold; }
+.td-orange { color: #b45309; font-weight: bold; }
+.td-red    { color: #c62828; font-weight: bold; }
+.td-blue   { color: #1565c0; font-weight: bold; }
+
+/* Status badge */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.b-active  { background: #e6f4ed; color: #1b7a40; border: 1px solid #b4dec9; }
+.b-settled { background: #e8edf5; color: #4a6080; border: 1px solid #b8c8dc; }
+.b-pending { background: #fef3cd; color: #b45309; border: 1px solid #f0cc6a; }
+
+/* Status select */
+.status-sel {
+  padding: 7px 12px;
+  border: 1.5px solid #c5d8f0;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  color: #1a1a2e;
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.status-sel:focus { border-color: #1565c0; }
+
+/* Buttons */
+.btn-update {
+  padding: 10px 24px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(13,71,161,.2);
+  transition: background .2s;
+}
+.btn-update:hover { background: #0d47a1; }
+
+/* Total row */
+.total-row td {
+  background: #eaf1fb !important;
+  font-weight: bold;
+  border-top: 2px solid #1565c0 !important;
+  color: #0d47a1;
+}
+
+/* Success / info strips */
+.success-strip {
+  display: none;
+  padding: 10px 16px;
+  background: #e6f4ed;
+  border: 1px solid #b4dec9;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1b7a40;
+  margin-bottom: 14px;
+}
+
+/* Payment method pill */
+.method-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  background: #eaf1fb;
+  border: 1px solid #c5d8f0;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #3a5a88;
+}
+
+/* Bottom actions row */
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.actions-row label {
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #3a5a88;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-brand">
+    <!-- UBL SVG Logo -->
+    <svg class="ubl-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#fff" fill-opacity="0.12"/>
+      <path d="M 18 50 A 34 34 0 1 1 50 84" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+      <ellipse cx="56" cy="50" rx="24" ry="15" fill="none" stroke="white" stroke-width="5"/>
+      <circle cx="79" cy="26" r="5" fill="white"/>
+    </svg>
+    <div class="header-text">
+      <h1>United Bank Limited</h1>
+      <p>Loan Settlement Management Portal</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-user" id="hdrUser">
+      <strong id="hdrName">—</strong>Loan Officer
+    </div>
+    <button class="btn-logout" id="btnLogout" onclick="doLogout()">Logout</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 1 — LOGIN
+══════════════════════════════════════════════════════════ -->
+<div class="page active" id="pg-login">
+  <div class="login-box">
+    <div class="login-box-header">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.15)"/>
+        <path d="M 18 50 A 34 34 0 1 1 50 84" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <ellipse cx="56" cy="50" rx="24" ry="15" fill="none" stroke="white" stroke-width="5"/>
+        <circle cx="79" cy="26" r="5" fill="white"/>
+      </svg>
+      <h2>Staff Login</h2>
+      <p>Authorised Personnel Only</p>
+    </div>
+    <div class="login-box-body">
+      <div class="login-error" id="loginErr">Invalid username or password.</div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="inUser" placeholder="Enter username" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="inPass" placeholder="Enter password"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">LOGIN</button>
+      <div class="login-hint">
+        Demo: <strong>admin</strong> / <strong>admin123</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 2 — LOAN SEARCH
+══════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-search">
+  <div class="search-box">
+    <div class="search-box-header">
+      <h2>Loan Search</h2>
+      <p>Enter a Loan ID to retrieve customer loan details</p>
+    </div>
+    <div class="search-box-body">
+      <div class="search-row">
+        <input type="text" id="inSearch" placeholder="e.g. UBL-10001"
+          oninput="this.value=this.value.toUpperCase()"
+          onkeydown="if(event.key==='Enter') doSearch()">
+        <button class="btn-search" onclick="doSearch()">Search</button>
+      </div>
+      <div class="search-error" id="searchErr">
+        ⚠ Loan ID not found. Please check and try again.
+      </div>
+      <div class="quick-pick">
+        <p>Sample Loan IDs</p>
+        <div class="id-chips" id="chips"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE 3 — LOAN DETAILS
+══════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-details">
+
+  <div class="breadcrumb">
+    <a onclick="showPage('search')">← Loan Search</a>
+    &rsaquo; Loan Details &rsaquo;
+    <span id="bc-id">—</span>
+  </div>
+
+  <div class="page-title" id="det-title">Loan Details</div>
+  <div class="page-subtitle" id="det-sub">&nbsp;</div>
+
+  <!-- Loan Details Table -->
+  <div class="panel">
+    <div class="panel-title">
+      Loan Information
+      <span id="det-status-badge">—</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer Name</th>
+            <th>Loan ID</th>
+            <th>Loan Amount (PKR)</th>
+            <th>Interest Rate</th>
+            <th>Paid Amount (PKR)</th>
+            <th>Outstanding Balance (PKR)</th>
+            <th>Penalty Charges (PKR)</th>
+            <th>Loan Status</th>
+          </tr>
+        </thead>
+        <tbody id="loanTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Payment History Table -->
+  <div class="panel">
+    <div class="panel-title">
+      Payment History
+      <span id="payCount">—</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Payment Date</th>
+            <th>Payment Amount (PKR)</th>
+            <th>Payment Method</th>
+          </tr>
+        </thead>
+        <tbody id="payTbody"></tbody>
+        <tfoot id="payFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Update Status -->
+  <div class="success-strip" id="successStrip">✓ Loan status updated successfully.</div>
+  <div class="actions-row">
+    <label>Update Status:</label>
+    <select class="status-sel" id="statusSel">
+      <option value="Active">Active</option>
+      <option value="Settlement Pending">Settlement Pending</option>
+      <option value="Settled">Settled</option>
+    </select>
+    <button class="btn-update" onclick="updateStatus()">Update Loan Status</button>
+  </div>
+
+</div><!-- /pg-details -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+/* ─── 50 LOAN RECORDS ──────────────────────────────────── */
+const NAMES = [
+  "Ahmed Khan","Fatima Siddiqui","Muhammad Ali","Ayesha Raza","Omar Farooq",
+  "Sana Malik","Bilal Hussain","Nadia Sheikh","Tariq Mahmood","Hina Baig",
+  "Usman Ghani","Rabia Noor","Kamran Iqbal","Sara Javed","Asad Mirza",
+  "Lubna Qureshi","Faisal Ahmad","Zara Hashmi","Imran Butt","Amna Zaidi",
+  "Waqas Ansari","Mehwish Chaudhry","Shoaib Rauf","Sadia Rizvi","Aamir Sultan",
+  "Naila Hamid","Junaid Aslam","Humaira Dar","Rizwan Memon","Sobia Bajwa",
+  "Khalid Rehman","Asma Tahir","Babar Karim","Uzma Farooqui","Salman Cheema",
+  "Farida Nawaz","Wasim Bhatti","Nadia Waheed","Haroon Latif","Rukhsana Shah",
+  "Adnan Warsi","Tehmina Gondal","Nasir Gillani","Robina Hanif","Jawad Saeed",
+  "Maryam Akbar","Sajid Lakhani","Zainab Pirzada","Naveed Baloch","Shahida Kiani"
+];
+
+const METHODS  = ["Online Transfer","Bank Deposit","Cash Payment","Cheque","IBFT"];
+const STATUSES = ["Active","Active","Active","Active","Settlement Pending","Settlement Pending","Settled"];
+
+function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+function fmtPKR(n) {
+  return "PKR " + Math.round(n).toLocaleString("en-PK");
+}
+
+function makeDate(monthsBack) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - monthsBack);
+  d.setDate(rnd(1, 28));
+  return d.toISOString().split('T')[0];
+}
+
+/* Generate loan data */
+const LOANS = {};
+for (let i = 0; i < 50; i++) {
+  const id       = "UBL-" + (10001 + i);
+  const loanAmt  = rnd(5, 100) * 50000;
+  const rate     = (rnd(8, 22) * 0.5);
+  const paid     = Math.floor(loanAmt * rnd(10, 85) / 100);
+  const balance  = loanAmt - paid;
+  const penalty  = rnd(0, 6) * 2000;
+  const status   = STATUSES[rnd(0, STATUSES.length - 1)];
+
+  /* Generate 3–6 payments */
+  const numPay = rnd(3, 6);
+  const payments = [];
+  let remaining = paid;
+  for (let p = 0; p < numPay; p++) {
+    const isLast = (p === numPay - 1);
+    let amt = isLast
+      ? remaining
+      : Math.floor(remaining / (numPay - p) * (0.7 + Math.random() * 0.6));
+    if (amt <= 0) amt = remaining;
+    remaining -= amt;
+    payments.push({
+      date:   makeDate(numPay - p + rnd(0, 2)),
+      amount: amt,
+      method: METHODS[rnd(0, METHODS.length - 1)]
+    });
+  }
+
+  LOANS[id] = {
+    id, name: NAMES[i], loanAmt, rate, paid, balance, penalty, status, payments
+  };
+}
+
+/* ─── AUTH ─────────────────────────────────────────────── */
+function doLogin() {
+  const u   = document.getElementById('inUser').value.trim();
+  const p   = document.getElementById('inPass').value.trim();
+  const err = document.getElementById('loginErr');
+  if (u === 'admin' && p === 'admin123') {
+    err.style.display = 'none';
+    document.getElementById('hdrName').textContent = u.toUpperCase();
+    document.getElementById('hdrUser').style.display = 'block';
+    document.getElementById('btnLogout').style.display = 'block';
+    showPage('search');
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('hdrUser').style.display  = 'none';
+  document.getElementById('btnLogout').style.display = 'none';
+  document.getElementById('inUser').value = '';
+  document.getElementById('inPass').value = '';
+  showPage('login');
+}
+
+/* ─── PAGE NAV ─────────────────────────────────────────── */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ─── QUICK CHIPS ──────────────────────────────────────── */
+const chipsEl = document.getElementById('chips');
+Object.keys(LOANS).slice(0, 15).forEach(id => {
+  const c = document.createElement('span');
+  c.className   = 'chip';
+  c.textContent = id;
+  c.onclick = () => {
+    document.getElementById('inSearch').value = id;
+    doSearch();
+  };
+  chipsEl.appendChild(c);
+});
+
+/* ─── SEARCH ───────────────────────────────────────────── */
+function doSearch() {
+  const id  = document.getElementById('inSearch').value.trim().toUpperCase();
+  const err = document.getElementById('searchErr');
+  err.style.display = 'none';
+  if (LOANS[id]) {
+    renderDetails(LOANS[id]);
+    showPage('details');
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+/* ─── RENDER DETAILS ───────────────────────────────────── */
+let activeLoanId = null;
+
+function badgeCls(s) {
+  if (s === 'Active')             return 'b-active';
+  if (s === 'Settlement Pending') return 'b-pending';
+  return 'b-settled';
+}
+
+function renderDetails(loan) {
+  activeLoanId = loan.id;
+
+  /* Breadcrumb / titles */
+  document.getElementById('bc-id').textContent    = loan.id;
+  document.getElementById('det-title').textContent = loan.name;
+  document.getElementById('det-sub').textContent   = loan.id + '  ·  Customer Loan Account';
+
+  /* Status badge in panel header */
+  const sb = document.getElementById('det-status-badge');
+  sb.textContent = loan.status;
+  sb.className   = 'badge ' + badgeCls(loan.status);
+
+  /* Loan table row */
+  document.getElementById('loanTbody').innerHTML = `
+    <tr>
+      <td class="td-bold">${loan.name}</td>
+      <td class="td-mono">${loan.id}</td>
+      <td class="td-blue">${fmtPKR(loan.loanAmt)}</td>
+      <td class="td-mono">${loan.rate.toFixed(2)}%</td>
+      <td class="td-green">${fmtPKR(loan.paid)}</td>
+      <td class="td-orange">${fmtPKR(loan.balance)}</td>
+      <td class="td-red">${fmtPKR(loan.penalty)}</td>
+      <td>
+        <span class="badge ${badgeCls(loan.status)}" id="inlineBadge">${loan.status}</span>
+      </td>
+    </tr>`;
+
+  /* Payment history */
+  const ptbody = document.getElementById('payTbody');
+  ptbody.innerHTML = '';
+  let totalPaid = 0;
+  loan.payments.forEach((pay, i) => {
+    totalPaid += pay.amount;
+    ptbody.innerHTML += `
+      <tr>
+        <td class="td-mono" style="color:#6a8aaa">${String(i + 1).padStart(2, '0')}</td>
+        <td class="td-mono">${pay.date}</td>
+        <td class="td-bold td-green">${fmtPKR(pay.amount)}</td>
+        <td><span class="method-pill">${pay.method}</span></td>
+      </tr>`;
+  });
+
+  /* Total payments footer row */
+  document.getElementById('payFoot').innerHTML = `
+    <tr class="total-row">
+      <td colspan="2" style="text-align:right;padding-right:14px;">Total Payments:</td>
+      <td colspan="2">${fmtPKR(totalPaid)}</td>
+    </tr>`;
+
+  document.getElementById('payCount').textContent =
+    loan.payments.length + ' transaction' + (loan.payments.length !== 1 ? 's' : '');
+
+  /* Status dropdown */
+  document.getElementById('statusSel').value = loan.status;
+
+  /* Hide success strip */
+  document.getElementById('successStrip').style.display = 'none';
+}
+
+/* ─── UPDATE STATUS ────────────────────────────────────── */
+function updateStatus() {
+  if (!activeLoanId) return;
+  const newStatus = document.getElementById('statusSel').value;
+  LOANS[activeLoanId].status = newStatus;
+
+  /* Update badge in table */
+  const badge = document.getElementById('inlineBadge');
+  if (badge) {
+    badge.textContent = newStatus;
+    badge.className   = 'badge ' + badgeCls(newStatus);
+  }
+
+  /* Update panel header badge */
+  const sb = document.getElementById('det-status-badge');
+  sb.textContent = newStatus;
+  sb.className   = 'badge ' + badgeCls(newStatus);
+
+  /* Show success */
+  const strip = document.getElementById('successStrip');
+  strip.textContent = `✓ ${activeLoanId} status updated to "${newStatus}" successfully.`;
+  strip.style.display = 'block';
+  setTimeout(() => { strip.style.display = 'none'; }, 5000);
+}
+</script>
+</body>
+</html>
